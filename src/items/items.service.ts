@@ -3,7 +3,8 @@
  */
 import { BaseItem, Item } from "./item.interface";
 import { Items } from "./items.interface";
-
+import { Book } from "./item.model";
+import mongoose from "mongoose";
 /**
  * In-Memory Store
  */
@@ -39,15 +40,18 @@ export const findAll = async (): Promise<Item[]> => Object.values(items);
 
 export const find = async (id: number): Promise<Item> => items[id];
 
-export const create = async (newItem: BaseItem): Promise<Item> => {
-  const id = new Date().valueOf();
+export const create = async (newItem: {
+  name: string;
+  price: number;
+}): Promise<any> => {
+  const book = new Book({
+    _id: new mongoose.Types.ObjectId(),
+    name: newItem.name,
+    price: newItem.price,
+  });
 
-  items[id] = {
-    id,
-    ...newItem,
-  };
-
-  return items[id];
+  const result = await book.save();
+  return result;
 };
 
 export const update = async (
