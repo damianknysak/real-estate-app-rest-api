@@ -6,6 +6,7 @@ import * as UserService from "./user.service";
 import { IBaseUser } from "./user.interface";
 import { UserResource } from "./user.resource";
 import { User } from "./user.model";
+import { checkAuth } from "../middleware/check-auth.middleware";
 
 /**
  * Router Definition
@@ -92,9 +93,11 @@ usersRouter.post("/", async (req: Request, res: Response) => {
 
 // PUT items/:id
 
-usersRouter.patch("/:id", async (req: Request, res: Response) => {
+usersRouter.patch("/:id", checkAuth, async (req: Request, res: Response) => {
   const id: string = req.params.id;
-
+  if (id != req.body.userData.userId) {
+    res.status(401).send("You are not this user");
+  }
   try {
     const userUpdate: Required<{
       firstName: string | undefined;
@@ -116,9 +119,12 @@ usersRouter.patch("/:id", async (req: Request, res: Response) => {
 
 // DELETE items/:id
 
-usersRouter.delete("/:id", async (req: Request, res: Response) => {
+usersRouter.delete("/:id", checkAuth, async (req: Request, res: Response) => {
+  const id: string = req.params.id;
+  if (id != req.body.userData.userId) {
+    res.status(401).send("You are not this user");
+  }
   try {
-    const id: string = req.params.id;
     await UserService.remove(id);
 
     res.status(204).send("User deleted.");
