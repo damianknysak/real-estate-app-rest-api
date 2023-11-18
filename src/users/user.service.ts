@@ -5,10 +5,58 @@ import { IBaseUser, IUser } from "./user.interface";
 import { User } from "./user.model";
 import mongoose from "mongoose";
 import { mapUserToResource, mapUsersToResources } from "./user.resource";
-
+import bcrypt from "bcrypt";
+import * as jwt from "jsonwebtoken";
 /**
  * Service Methods
  */
+export const login = (body: any, user: IUser): Promise<any> => {
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(body.password, user.password, (err, result) => {
+      if (err) {
+        reject("Error comparing passwords");
+      }
+
+      if (result) {
+        const token = jwt.sign(
+          { email: user.email, userId: user._id },
+          process.env.JWT_KEY as string,
+          {
+            expiresIn: "365d",
+          }
+        );
+        const userResponse = mapUserToResource(user);
+
+        resolve({ user: userResponse, token });
+      } else {
+        reject("Invalid password");
+      }
+    });
+  });
+};
+
+export const register = async (body: any): Promise<any> => {
+  const hash = await bcrypt.hash(body.password, 10);
+
+  const user = new User({
+    _id: new mongoose.Types.ObjectId(),
+    firstName: body.firstName,
+    lastName: body.lastName,
+    email: body.email,
+    password: hash,
+  });
+
+  const token = jwt.sign(
+    { email: user.email, userId: user._id },
+    process.env.JWT_KEY as string,
+    { expiresIn: "1h" }
+  );
+
+  const result: any = await user.save();
+  const userResponse = { ...result._doc };
+
+  return { user: mapUserToResource(userResponse), token: token };
+};
 
 export const findAll = async (): Promise<any> => {
   const users: any = await User.find();
