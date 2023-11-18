@@ -52,7 +52,7 @@ usersRouter.post("/register", async (req: Request, res: Response) => {
 });
 
 // GET items
-usersRouter.get("/", async (req: Request, res: Response) => {
+usersRouter.get("/", checkAuth, async (req: Request, res: Response) => {
   try {
     const items: UserResource[] = await UserService.findAll();
 
@@ -62,7 +62,7 @@ usersRouter.get("/", async (req: Request, res: Response) => {
   }
 });
 // GET items/:id
-usersRouter.get("/:id", async (req: Request, res: Response) => {
+usersRouter.get("/:id", checkAuth, async (req: Request, res: Response) => {
   const id: string = req.params.id;
 
   try {
@@ -79,7 +79,7 @@ usersRouter.get("/:id", async (req: Request, res: Response) => {
 
 // POST items
 
-usersRouter.post("/", async (req: Request, res: Response) => {
+usersRouter.post("/", checkAuth, async (req: Request, res: Response) => {
   try {
     const user: Required<IBaseUser> = req.body;
 
