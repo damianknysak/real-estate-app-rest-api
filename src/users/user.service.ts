@@ -1,49 +1,70 @@
 /**
  * Data Model Interfaces
  */
-import { IBaseUser, IUser, IUsers } from "./user.interface";
+import { IBaseUser, IUser } from "./user.interface";
 import { User } from "./user.model";
 import mongoose from "mongoose";
+import { mapUserToResource, mapUsersToResources } from "./user.resource";
 
 /**
  * Service Methods
  */
 
-// export const findAll = async (): Promise<Item[]> => Object.values(items);
+export const findAll = async (): Promise<any> => {
+  const users: any = await User.find();
+  if (users) {
+    return mapUsersToResources(users);
+  }
+  return null;
+};
 
-// export const find = async (id: number): Promise<Item> => items[id];
+export const find = async (id: string): Promise<any> => {
+  const user: any = await User.findOne({ _id: id });
+  if (user) {
+    return mapUserToResource(user);
+  }
+  return null;
+};
 
 export const create = async (newUser: IBaseUser): Promise<any> => {
-  const book = new User({
+  const user = new User({
     _id: new mongoose.Types.ObjectId(),
     ...newUser,
   });
 
-  const result = await book.save();
-  return result;
+  const result: any = await user.save();
+  return mapUserToResource(result);
 };
 
-// export const update = async (
-//   id: number,
-//   itemUpdate: BaseItem
-// ): Promise<Item | null> => {
-//   const item = await find(id);
+export const update = async (
+  id: string,
+  userUpdate: {
+    firstName: string | undefined;
+    lastName: string | undefined;
+    profileImage: string | undefined;
+  }
+): Promise<any> => {
+  let user = await find(id);
 
-//   if (!item) {
-//     return null;
-//   }
+  const updatedUser: any = await User.findOneAndUpdate(
+    { _id: id },
+    { $set: { ...userUpdate } },
+    { returnOriginal: false }
+  );
 
-//   items[id] = { id, ...itemUpdate };
+  if (!updatedUser) {
+    return null;
+  }
 
-//   return items[id];
-// };
+  return mapUserToResource(updatedUser);
+};
 
-// export const remove = async (id: number): Promise<null | void> => {
-//   const item = await find(id);
+export const remove = async (id: string): Promise<any> => {
+  const user = User.find({ _id: id });
+  const deleted = User.deleteOne({ _id: id });
+  if (!deleted) {
+    return null;
+  }
 
-//   if (!item) {
-//     return null;
-//   }
-
-//   delete items[id];
-// };
+  return deleted;
+};
