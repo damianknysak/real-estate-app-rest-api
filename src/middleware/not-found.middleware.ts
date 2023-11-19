@@ -7,5 +7,9 @@ export const notFoundHandler = (
 ) => {
   const message = "Resource not found";
 
+  if (request.path.startsWith("/images")) {
+    return next();
+  }
+
   response.status(404).send(message);
 };

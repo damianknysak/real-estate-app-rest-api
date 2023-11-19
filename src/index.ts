@@ -40,6 +40,9 @@ app.use("/api/users", usersRouter);
 app.use(errorHandler);
 app.use(notFoundHandler);
 
+//public images
+app.use("/images", express.static("images"));
+
 /**
  * Server Activation
  */

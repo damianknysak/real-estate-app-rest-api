@@ -1,12 +1,30 @@
 /**
  * Required External Modules and Interfaces
  */
-import express, { Request, Response } from "express";
+import express, { NextFunction, Request, Response } from "express";
 import * as UserService from "./user.service";
 import { IBaseUser } from "./user.interface";
 import { UserResource } from "./user.resource";
 import { User } from "./user.model";
 import { checkAuth } from "../middleware/check-auth.middleware";
+import multer from "multer";
+
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "./images");
+  },
+  filename: function (req, file, cb) {
+    cb(null, new Date().toISOString().replace(/:/g, "-") + file.originalname);
+  },
+});
+const fileFilter = (req: any, file: any, cb: any) => {
+  if (file.mimetype === "image/jpeg" || file.mimetype === "image/png") {
+    cb(null, true);
+  } else {
+    cb(null, false);
+  }
+};
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 /**
  * Router Definition
@@ -90,6 +108,40 @@ usersRouter.post("/", checkAuth, async (req: Request, res: Response) => {
     res.status(500).send(e.message);
   }
 });
+
+// POST items
+
+usersRouter.post(
+  "/add-profile-image",
+  checkAuth,
+  upload.single("image"),
+  async (req: any, res: Response) => {
+    try {
+      const id = req.userData.userId;
+      console.log(id);
+      const newProfileImage = req.file && req.file.path;
+
+      // Check if a previous profile image exists
+      const user = await User.findOne({ _id: id });
+      if (user) {
+        UserService.addOrUpdateProfileImage(id, user, newProfileImage);
+      } else {
+        res.status(404).json({
+          message: `User not found`,
+        });
+      }
+
+      res.status(200).json({
+        message: `Image added`,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({
+        error: err,
+      });
+    }
+  }
+);
 
 // PUT items/:id
 
