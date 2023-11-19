@@ -9,6 +9,7 @@ import { usersRouter } from "./users/user.router";
 import { errorHandler } from "./middleware/error.middleware";
 import { notFoundHandler } from "./middleware/not-found.middleware";
 import mongoose from "mongoose";
+import { propertiesRouter } from "./properties/property.router";
 
 dotenv.config();
 /**
@@ -36,10 +37,12 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 app.use("/api/users", usersRouter);
+app.use("/api/properties", propertiesRouter);
 
 app.use(errorHandler);
 app.use(notFoundHandler);
 
+app.use(helmet.crossOriginResourcePolicy({ policy: "cross-origin" }));
 //public images
 app.use("/images", express.static("images"));
 
