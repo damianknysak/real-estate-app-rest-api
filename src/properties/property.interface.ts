@@ -1,34 +1,25 @@
-import mongoose from "mongoose";
-
-interface FloorSize {
-  value: number;
-}
-
-interface LeaseLength {
-  value: number;
-  unitText: string;
-}
-
-interface Occupancy {
+export interface IOccupancy {
   minValue: number;
   maxValue: number;
 }
-
-interface Sell {
-  price: number;
-}
-
-interface Property {
-  type: string;
+export interface IProperty {
+  type:
+    | "Single-Family Home"
+    | "Apartment"
+    | "Condominium"
+    | "Townhouse"
+    | "Multi-Family Home";
+  authorId: string;
   name: string;
   description: string;
-  imageUrl: string;
+  images: string[];
   numberOfRooms: number;
-  occupancy: Occupancy;
-  floorSize: FloorSize;
+  occupancy: IOccupancy;
+  floorSize: number;
   cardType: "sell" | "lease";
-  lease?: LeaseLength;
-  sell?: Sell;
+  leaseLength?: number;
+  leasePrice?: number;
+  sellPrice?: number;
   numberOfBathroomsTotal: number;
   numberOfBedrooms: number;
   permittedUsage: string;
@@ -37,42 +28,3 @@ interface Property {
   address: string;
   telephone: string;
 }
-
-export const propertySchema = new mongoose.Schema<Property>({
-  type: { type: String, required: true },
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  imageUrl: { type: String, required: true },
-  numberOfRooms: { type: Number, required: true },
-  occupancy: { type: Object, required: true },
-  floorSize: { type: Object, required: true },
-  cardType: {
-    type: String,
-    required: true,
-    enum: ["sell", "lease"],
-  },
-  lease: {
-    type: Object,
-    required: function (this: Property) {
-      return this.cardType === "lease";
-    },
-  },
-  sell: {
-    type: Object,
-    required: function (this: Property) {
-      return this.cardType === "sell";
-    },
-  },
-  numberOfBathroomsTotal: { type: Number, required: true },
-  numberOfBedrooms: { type: Number, required: true },
-  permittedUsage: { type: String, required: true },
-  petsAllowed: { type: String, required: true },
-  yearBuilt: { type: Number, required: true },
-  address: { type: String, required: true },
-  telephone: { type: String, required: true },
-});
-
-export const PropertyModel = mongoose.model<Property>(
-  "Property",
-  propertySchema
-);

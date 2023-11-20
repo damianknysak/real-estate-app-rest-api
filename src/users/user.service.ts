@@ -78,7 +78,7 @@ export const register = async (body: any): Promise<any> => {
 };
 
 export const findAll = async (): Promise<any> => {
-  const users: any = await User.find();
+  const users: IUser[] = await User.find();
   if (users) {
     return mapUsersToResources(users);
   }
@@ -86,7 +86,7 @@ export const findAll = async (): Promise<any> => {
 };
 
 export const find = async (id: string): Promise<any> => {
-  const user: any = await User.findOne({ _id: id });
+  const user: IUser | null = await User.findOne({ _id: id });
   if (user) {
     return mapUserToResource(user);
   }

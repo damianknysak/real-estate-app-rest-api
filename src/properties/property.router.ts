@@ -5,6 +5,7 @@ import express, { NextFunction, Request, Response } from "express";
 import * as PropertyService from "./property.service";
 import { checkAuth } from "../middleware/check-auth.middleware";
 import multer from "multer";
+import { IProperty } from "./property.interface";
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -55,16 +56,31 @@ propertiesRouter.get("/:id", checkAuth, async (req: Request, res: Response) => {
   }
 });
 
-propertiesRouter.post("/", checkAuth, async (req: Request, res: Response) => {
-  try {
-    const property: any = req.body;
-    const newProperty = await PropertyService.createProperty(property);
+propertiesRouter.post(
+  "/",
+  checkAuth,
+  upload.array("image", 5),
+  async (req: Request, res: Response) => {
+    try {
+      const property: IProperty = req.body;
+      const userId = (req as any).userData.userId;
 
-    res.status(201).json(newProperty);
-  } catch (e: any) {
-    res.status(500).send(e.message);
+      const newProfileImages: string[] =
+        req.files && (req as any)["files"].map((file: any) => file.path);
+      if (property && newProfileImages) {
+        const newProperty = await PropertyService.createProperty(
+          property,
+          newProfileImages,
+          userId
+        );
+        return res.status(201).json(newProperty);
+      }
+      res.status(403).send("Wrong Request");
+    } catch (e: any) {
+      res.status(500).send(e.message);
+    }
   }
-});
+);
 
 propertiesRouter.patch(
   "/:id",

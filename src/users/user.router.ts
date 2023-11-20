@@ -118,7 +118,6 @@ usersRouter.post(
   async (req: any, res: Response) => {
     try {
       const id = req.userData.userId;
-      console.log(id);
       const newProfileImage = req.file && req.file.path;
 
       // Check if a previous profile image exists
@@ -126,12 +125,12 @@ usersRouter.post(
       if (user) {
         UserService.addOrUpdateProfileImage(id, user, newProfileImage);
       } else {
-        res.status(404).json({
+        return res.status(404).json({
           message: `User not found`,
         });
       }
 
-      res.status(200).json({
+      return res.status(200).json({
         message: `Image added`,
       });
     } catch (err) {
