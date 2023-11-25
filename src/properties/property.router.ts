@@ -77,6 +77,7 @@ propertiesRouter.post(
       }
       res.status(403).send("Wrong Request");
     } catch (e: any) {
+      console.log(e);
       res.status(500).send(e.message);
     }
   }
